@@ -26,7 +26,7 @@ while True:
     
     #insert record
     data = {'date':date_mmddyyyy,'time':time_hhmmss,'value':led_reading}
-    result = requests.post(firebase_url + '/' + led_location + '/temperature.json', data=json.dumps(data))
+    result = requests.post(firebase_url + '/' + led_location + '/led.json', data=json.dumps(data))
     
     print 'Record inserted. Result Code = ' + str(result.status_code) + ',' + result.text
     time.sleep(fixed_interval)
