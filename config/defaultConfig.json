@@ -1,0 +1,13 @@
+{
+    "arduino-settings":
+    {
+        "port": "/dev/ttyACM0",
+        "baud": 9600
+
+    },
+
+    "fixed-interval":  5,
+
+    "firebase-url":  "https://test-project-9c6c7.firebaseio.com/"
+
+}
