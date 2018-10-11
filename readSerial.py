@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-import sys
 import serial
 import time
 import os
@@ -13,9 +12,7 @@ class ReadSerial():
   def __init__(self):
 
     os.getcwd()
-    os.chdir('..')
     config_path = os.getcwd() + "/config/defaultConfig.json"
-
 
     with open(config_path, 'r') as f:
         datastore = json.load(f)
@@ -40,14 +37,4 @@ class ReadSerial():
       self.databaseWriter.run(led_reading) 
               
 
-  
-def main(args):
-    readSerial = ReadSerial()
-    readSerial.run()
 
-if __name__ == "__main__":
-    # run main when this file is ran directly as an executable (is not imported from another script)
-    try:
-      main(sys.argv)
-    except KeyboardInterrupt:
-      print ("end script")
