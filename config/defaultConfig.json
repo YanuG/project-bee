@@ -6,7 +6,7 @@
 
     },
 
-    "fixed-interval":  5,
+    "fixed-interval":  2,
 
     "firebase-url":  "https://test-project-9c6c7.firebaseio.com/"
 

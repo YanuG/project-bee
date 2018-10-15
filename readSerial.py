@@ -22,19 +22,50 @@ class ReadSerial():
     #Setup a loop to send values at fixed intervals in seconds
     self.fixed_interval = datastore["fixed-interval"]
     # create database object 
-    self.databaseWriter =  DatabaseWriter()
+    self.databaseWriter =  DatabaseWriter(datastore)
 
   def run(self):
 
     while True: 
 
-      #LED value obtained from Arduino   - this is tempory until we have sensors working    
-      led_reading = self.ser.readline()
+      if self.ser.isOpen():
+        read_serial = self.ser.readline()
+        if (read_serial[0:5] == "Start"):
+          hum = read_serial[7:12]
+          temp = read_serial[13:18]
+          air_quality_num = read_serial[19:20]
+          measurment = Measurment(hum, temp, air_quality_num)
+          # send reading to database 
+          self.databaseWriter.run(measurment) 
+   
       time.sleep(self.fixed_interval)
 
-      # send reading to database 
-      # TODO need to create a data object and store serial information in it
-      self.databaseWriter.run(led_reading) 
-              
+                 
+class Measurment():
+  
+  def __init__(self, hum, temp, air_quality_num):
+
+    self.hum = hum
+    self.temp = temp
+    
+    if air_quality_num == 0 or air_quality_num == 1:
+      self.air_quality = "High pollution"
+
+    elif air_quality_num == 2:
+       self.air_quality = "Low pollution"
+
+    elif air_quality_num == 3:
+       self.air_quality = "Fresh air"
+
+  def getTemperature(self):
+    return self.temp
+
+  def getHuminity(self):
+    return self.hum
+
+  def getAirQuality(self):
+    return self.air_quality
+
+      
 
 
