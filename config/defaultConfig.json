@@ -8,6 +8,8 @@
 
     "fixed-interval":  2,
 
-    "firebase-url":  "https://test-project-9c6c7.firebaseio.com/"
+    "firebase-url":  "https://beehive-project-ccf6a.firebaseio.com/",
+    "cluster-id": "PiCluster",
+    "hive-id": "PiHive"
 
 }

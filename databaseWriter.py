@@ -2,31 +2,28 @@
 import time
 import requests
 import json
-import os
+from requests import HTTPError
 
-class DatabaseWriter():
+
+
+class DatabaseWriter:
 
     def __init__(self, datastore):
-
         self.firebase_url = datastore["firebase-url"]
-  
+        self.cluster_id = datastore["cluster-id"]
+        self.hive_id = datastore["hive-id"]
 
-    def run(self, measurment):  
+    def run(self, measurement):
+        payload = {
+            "temperature": measurement.temp,
+            "humidity": measurement.hum,
+            "time": time.time()
+        }
+        url = '%s/measurements/%s/%s.json' % (self.firebase_url, self.cluster_id, self.hive_id)
+        response = requests.post(url, data=json.dumps(payload))
 
-        #current time and date
-        time_hhmmss = time.strftime('%H:%M:%S')
-        date_mmddyyyy = time.strftime('%d/%m/%Y')
-        
-        #current location name
-        led_location = 'Ottawa'
-
-        print measurment.getTemperature()
-        # print led_reading + ',' + time_hhmmss + ',' + date_mmddyyyy + ',' + led_location
-        
-        # #insert record
-        # data = {'date':date_mmddyyyy,'time':time_hhmmss,'value':led_reading}
-        # result = requests.post(self.firebase_url + '/' + led_location + '/led.json', data=json.dumps(data))
-        
-        # print 'Record inserted. Result Code = ' + str(result.status_code) + ',' + result.text
-     
-        
+        try:
+            response.raise_for_status()
+            print("Saved to Firebase")
+        except HTTPError:
+            print("Failed to save to Firebase: " + response.text)
