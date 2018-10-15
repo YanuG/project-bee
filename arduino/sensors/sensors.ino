@@ -58,6 +58,7 @@ void loop()
 {
 
  temperatureSensor();
+ microphoneSensor();
  airQualitySensor();
   
 }
@@ -117,13 +118,8 @@ Microphone Amplifier
 const int sampleWindow = 50; // Sample window width in mS (50 mS = 20Hz)
 unsigned int sample;
  
-void setup() 
-{
-   Serial.begin(9600);
-}
  
- 
-void loop() 
+void microphoneSensor() 
 {
    unsigned long startMillis= millis();  // Start of sample window
    unsigned int peakToPeak = 0;   // peak-to-peak level
