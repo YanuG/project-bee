@@ -97,7 +97,7 @@ void sendMessage() {
   msg += current_quality;
   msg += "M";
   msg += peakToPeak;
-  Serial.print(msg);`
+  Serial.print(msg);
   
   
 }
