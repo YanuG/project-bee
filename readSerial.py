@@ -43,10 +43,11 @@ class ReadSerial():
                  
 class Measurment():
   
-  def __init__(self, hum, temp, air_quality_num):
+  def __init__(self, hum, temp, mic, air_quality_num):
 
     self.hum = hum
     self.temp = temp
+    self.mic = mic
     
     if air_quality_num == 0 or air_quality_num == 1:
       self.air_quality = "High pollution"
@@ -60,11 +61,14 @@ class Measurment():
   def getTemperature(self):
     return self.temp
 
-  def getHuminity(self):
+  def getHumidity(self):
     return self.hum
 
   def getAirQuality(self):
     return self.air_quality
+  
+  def getSound(self):
+    return self.mic
 
       
 
