@@ -95,7 +95,7 @@ void sendMessage() {
   msg += "Q";
   msg += current_quality;
   msg += "M";
-  msg += "mic";
+  msg += mic;
   Serial.print(msg);`
   
   
