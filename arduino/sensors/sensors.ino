@@ -14,6 +14,7 @@ AirQuality airqualitysensor;
 //Variables
 float hum;  //Stores humidity value
 float temp; //Stores temperature value
+int peakToPeak;
 int current_quality; //Stores air_quality_value
 
 //Interrupt for temp sensor 
@@ -95,7 +96,7 @@ void sendMessage() {
   msg += "Q";
   msg += current_quality;
   msg += "M";
-  msg += mic;
+  msg += peakToPeak;
   Serial.print(msg);`
   
   
@@ -124,7 +125,6 @@ unsigned int sample;
 void microphoneSensor() 
 {
    unsigned long startMillis= millis();  // Start of sample window
-   unsigned int peakToPeak = 0;   // peak-to-peak level
  
    unsigned int signalMax = 0;
    unsigned int signalMin = 1024;
@@ -147,5 +147,5 @@ void microphoneSensor()
    }
    peakToPeak = signalMax - signalMin;  // max - min = peak-peak amplitude
     
-   Serial.println(peakToPeak);
+
 }
