@@ -30,11 +30,13 @@ class ReadSerial():
 
       if self.ser.isOpen():
         read_serial = self.ser.readline()
+        print(read_serial)
         if (read_serial[0:5] == "Start"):
           hum = read_serial[7:12]
           temp = read_serial[13:18]
-          air_quality_num = read_serial[19:20]
-          measurment = Measurment(hum, temp, air_quality_num)
+          mic = read_serial[19:24]
+          air_quality_num = read_serial[25:26]
+          measurment = Measurment(hum, temp, mic, air_quality_num)
           # send reading to database 
           self.databaseWriter.run(measurment) 
    
@@ -43,10 +45,11 @@ class ReadSerial():
                  
 class Measurment():
   
-  def __init__(self, hum, temp, air_quality_num):
+  def __init__(self, hum, temp, mic, air_quality_num):
 
     self.hum = hum
     self.temp = temp
+    self.mic = mic
     
     if air_quality_num == 0 or air_quality_num == 1:
       self.air_quality = "High pollution"
@@ -60,11 +63,14 @@ class Measurment():
   def getTemperature(self):
     return self.temp
 
-  def getHuminity(self):
+  def getHumidity(self):
     return self.hum
 
   def getAirQuality(self):
     return self.air_quality
+  
+  def getSound(self):
+    return self.mic
 
       
 
