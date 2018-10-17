@@ -1,9 +1,1 @@
-# project-bee
-
-## How to run Project 
-
-Type in terminal
-
-```
-./main.py
-```
+$ git merge eabujayyab-patch1 eabujayyab-patch-2
