@@ -88,18 +88,19 @@ void airQualitySensor() {
 
 void sendMessage() {
 
-  
-  msg = "Start[H";
-  msg += hum;
-  msg += "T";
-  msg += temp;
-  msg += "Q";
-  msg += current_quality;
-  msg += "M";
-  msg += peakToPeak;
-  Serial.print(msg);
-  
-  
+
+ msg = "[Humidity: ";
+ msg += hum;
+ msg += "; Temperature: ";
+ msg += temp;
+ msg += "; Quality: ";
+ msg += current_quality;
+ msg += "; Sound: ";
+ msg += peakToPeak ;
+ msg += "] \n";
+ Serial.print(msg);
+
+
 }
 
 ISR(TIMER1_COMPA_vect){
