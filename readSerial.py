@@ -33,8 +33,9 @@ class ReadSerial():
         if (read_serial[0:5] == "Start"):
           hum = read_serial[7:12]
           temp = read_serial[13:18]
-          air_quality_num = read_serial[19:20]
-          measurment = Measurment(hum, temp, air_quality_num)
+          mic = read_serial[19:24]
+          air_quality_num = read_serial[25:26]
+          measurment = Measurment(hum, temp, mic, air_quality_num)
           # send reading to database 
           self.databaseWriter.run(measurment) 
    
