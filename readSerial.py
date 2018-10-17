@@ -30,6 +30,7 @@ class ReadSerial():
 
       if self.ser.isOpen():
         read_serial = self.ser.readline()
+        print(read_serial)
         if (read_serial[0:5] == "Start"):
           hum = read_serial[7:12]
           temp = read_serial[13:18]
