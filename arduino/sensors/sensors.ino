@@ -2,6 +2,7 @@
 #include <dht.h>
 #include"AirQuality.h"
 #include"Arduino.h"
+#include "arduinoFFT.h"
 
 //Object for temp sensor
 dht DHT;
@@ -116,37 +117,46 @@ ISR(TIMER1_COMPA_vect){
 }
 
 /****************************************
-Microphone Amplifier
+Microphone 
 ****************************************/
- 
-const int sampleWindow = 50; // Sample window width in mS (50 mS = 20Hz)
-unsigned int sample;
- 
- 
-void microphoneSensor() 
-{
-   unsigned long startMillis= millis();  // Start of sample window
- 
-   unsigned int signalMax = 0;
-   unsigned int signalMin = 1024;
- 
-   // collect data for 50 mS
-   while (millis() - startMillis < sampleWindow)
-   {
-      sample = analogRead(0);
-      if (sample < 1024)  // toss out spurious readings
-      {
-         if (sample > signalMax)
-         {
-            signalMax = sample;  // save just the max levels
-         }
-         else if (sample < signalMin)
-         {
-            signalMin = sample;  // save just the min levels
-         }
-      }
-   }
-   peakToPeak = signalMax - signalMin;  // max - min = peak-peak amplitude
-    
 
+ 
+#define SAMPLES 128             //Must be a power of 2
+#define SAMPLING_FREQUENCY 9999 //Hz, must be less than 10000 due to ADC
+ 
+arduinoFFT FFT = arduinoFFT();
+ 
+unsigned int sampling_period_us;
+unsigned long microseconds;
+ 
+double vReal[SAMPLES];
+double vImag[SAMPLES];
+ 
+ 
+void microphoneSensor() {
+   
+    /*SAMPLING*/
+    for(int i=0; i<SAMPLES; i++)
+    {
+        microseconds = micros();    //Overflows after around 70 minutes!
+     
+        vReal[i] = analogRead(0);
+        vImag[i] = 0;
+     
+        while(micros() < (microseconds + sampling_period_us)){
+        }
+    }
+ 
+    /*FFT*/
+    FFT.Windowing(vReal, SAMPLES, FFT_WIN_TYP_HAMMING, FFT_FORWARD);
+    FFT.Compute(vReal, vImag, SAMPLES, FFT_FORWARD);
+    FFT.ComplexToMagnitude(vReal, vImag, SAMPLES);
+    double peak = FFT.MajorPeak(vReal, SAMPLES, SAMPLING_FREQUENCY);
+ 
+    /*PRINT RESULTS*/
+    Serial.println(peak);     //Print out what frequency is the most dominant.
+
+ 
+    delay(50);  //milliseconds
 }
+
