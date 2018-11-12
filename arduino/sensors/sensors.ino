@@ -8,15 +8,25 @@
 dht DHT;
 //Object for air quality sensor
 AirQuality airqualitysensor;
+//Object for microphone
+arduinoFFT FFT = arduinoFFT();
+
 
 //Constants
-#define DHT22_PIN 7     
+#define DHT22_PIN 7
+#define SAMPLES 128             //Must be a power of 2
+#define SAMPLING_FREQUENCY 9999 //Hz, must be less than 10000 due to ADC
 
 //Variables
 float hum;  //Stores humidity value
 float temp; //Stores temperature value
-int peakToPeak;
-int current_quality; //Stores air_quality_value
+int peak; //Stores microphone frequency
+int current_quality; //Stores air quality value
+unsigned int sampling_period_us;
+unsigned long microseconds; 
+double vReal[SAMPLES];
+double vImag[SAMPLES];
+ 
 
 //Interrupt for temp sensor 
 boolean flag1 = false;
@@ -97,7 +107,7 @@ void sendMessage() {
  msg += "; Quality: ";
  msg += current_quality;
  msg += "; Sound: ";
- msg += peakToPeak ;
+ msg += peak;
  msg += "] \n";
  Serial.print(msg);
 
@@ -116,22 +126,7 @@ ISR(TIMER1_COMPA_vect){
   }
 }
 
-/****************************************
-Microphone 
-****************************************/
 
- 
-#define SAMPLES 128             //Must be a power of 2
-#define SAMPLING_FREQUENCY 9999 //Hz, must be less than 10000 due to ADC
- 
-arduinoFFT FFT = arduinoFFT();
- 
-unsigned int sampling_period_us;
-unsigned long microseconds;
- 
-double vReal[SAMPLES];
-double vImag[SAMPLES];
- 
  
 void microphoneSensor() {
    
@@ -152,11 +147,6 @@ void microphoneSensor() {
     FFT.Compute(vReal, vImag, SAMPLES, FFT_FORWARD);
     FFT.ComplexToMagnitude(vReal, vImag, SAMPLES);
     double peak = FFT.MajorPeak(vReal, SAMPLES, SAMPLING_FREQUENCY);
- 
-    /*PRINT RESULTS*/
-    Serial.println(peak);     //Print out what frequency is the most dominant.
 
- 
-    delay(50);  //milliseconds
 }
 
