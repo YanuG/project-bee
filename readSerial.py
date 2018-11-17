@@ -5,6 +5,8 @@ import os
 import json
 
 from databaseWriter import DatabaseWriter
+import display 
+
 
 class ReadSerial():
 
@@ -23,6 +25,7 @@ class ReadSerial():
     # create database object 
     self.databaseWriter =  DatabaseWriter(datastore)
 
+
   def run(self):
 
     while True: 
@@ -35,10 +38,12 @@ class ReadSerial():
           hum = read_serial[11:16]
           temp = read_serial[31:36]
           air_quality_num = read_serial[47:48]
-          mic = read_serial[57:58]
+          mic = read_serial[59:60]
           measurment = Measurment(hum, temp, mic, air_quality_num)
           # send reading to database 
-          #self.databaseWriter.run(measurment) 
+          self.databaseWriter.run(measurment) 
+
+          display.updateDisplay(measurment)
    
       time.sleep(self.fixed_interval)
 
