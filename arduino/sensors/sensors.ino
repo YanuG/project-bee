@@ -141,12 +141,12 @@ void microphoneSensor() {
         while(micros() < (microseconds + sampling_period_us)){
         }
     }
- 
-    /*FFT*/
+  /*FFT*/
     FFT.Windowing(vReal, SAMPLES, FFT_WIN_TYP_HAMMING, FFT_FORWARD);
     FFT.Compute(vReal, vImag, SAMPLES, FFT_FORWARD);
     FFT.ComplexToMagnitude(vReal, vImag, SAMPLES);
     double peak = FFT.MajorPeak(vReal, SAMPLES, SAMPLING_FREQUENCY);
+ 
 
 }
 

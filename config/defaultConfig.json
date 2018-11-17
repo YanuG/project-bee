@@ -8,6 +8,8 @@
 
     "fixed-interval":  2,
 
+    "store_database": false,
+
     "firebase-url":  "https://beehive-project-ccf6a.firebaseio.com/",
     "cluster-id": "PiCluster",
     "hive-id": "PiHive"
