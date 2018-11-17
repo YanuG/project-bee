@@ -12,18 +12,20 @@ class DatabaseWriter:
         self.firebase_url = datastore["firebase-url"]
         self.cluster_id = datastore["cluster-id"]
         self.hive_id = datastore["hive-id"]
+        self.store_data = datastore["store_database"]
 
     def run(self, measurement):
-        payload = {
-            "temperature": measurement.temp,
-            "humidity": measurement.hum,
-            "time": time.time()
-        }
-        url = '%s/measurements/%s/%s.json' % (self.firebase_url, self.cluster_id, self.hive_id)
-        response = requests.post(url, data=json.dumps(payload))
+        if self.store_data:
+            payload = {
+                "temperature": measurement.temp,
+                "humidity": measurement.hum,
+                "time": time.time()
+            }
+            url = '%s/measurements/%s/%s.json' % (self.firebase_url, self.cluster_id, self.hive_id)
+            response = requests.post(url, data=json.dumps(payload))
 
-        try:
-            response.raise_for_status()
-            print("Saved to Firebase")
-        except HTTPError:
-            print("Failed to save to Firebase: " + response.text)
+            try:
+                response.raise_for_status()
+                print("Saved to Firebase")
+            except HTTPError:
+                print("Failed to save to Firebase: " + response.text)
