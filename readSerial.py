@@ -5,7 +5,6 @@ import os
 import json
 
 from databaseWriter import DatabaseWriter
-import display 
 
 
 class ReadSerial():
@@ -32,9 +31,8 @@ class ReadSerial():
 
       if self.ser.isOpen():
         read_serial = self.ser.readline()
-        print (read_serial)
         # example output [Humidity: 24.60; Temperature: 24.00; Quality: 3; Sound: 2] 
-        if (read_serial[0:1] == "[" and len(read_serial) == 61):
+        if (read_serial[0:1] == "[" and len(read_serial) == 61  and read_serial[60:61] == "]"):
           hum = read_serial[11:16]
           temp = read_serial[31:36]
           air_quality_num = read_serial[47:48]
@@ -42,8 +40,6 @@ class ReadSerial():
           measurment = Measurment(hum, temp, mic, air_quality_num)
           # send reading to database 
           self.databaseWriter.run(measurment) 
-
-          display.updateDisplay(measurment)
    
       time.sleep(self.fixed_interval)
 
