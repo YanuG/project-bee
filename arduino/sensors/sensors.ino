@@ -133,7 +133,7 @@ void microphoneSensor()
    // collect data for 50 mS
    while (millis() - startMillis < sampleWindow)
    {
-      sample = analogRead(0);
+      sample = analogRead(1);
       if (sample < 1024)  // toss out spurious readings
       {
          if (sample > signalMax)
