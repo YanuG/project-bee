@@ -6,7 +6,6 @@ import json
 
 from databaseWriter import DatabaseWriter
 
-
 class ReadSerial():
 
   def __init__(self):
@@ -30,15 +29,16 @@ class ReadSerial():
 
       if self.ser.isOpen():
         read_serial = self.ser.readline()
-        print(read_serial)
-        if (read_serial[0:5] == "Start"):
-          hum = read_serial[7:12]
-          temp = read_serial[13:18]
-          mic = read_serial[19:24]
-          air_quality_num = read_serial[25:26]
+        print (read_serial)
+        # example output [Humidity: 24.60; Temperature: 24.00; Quality: 3; Sound: 2] 
+        if (read_serial[0:1] == "[" and len(read_serial) == 61):
+          hum = read_serial[11:16]
+          temp = read_serial[31:36]
+          air_quality_num = read_serial[47:48]
+          mic = read_serial[57:58]
           measurment = Measurment(hum, temp, mic, air_quality_num)
           # send reading to database 
-          self.databaseWriter.run(measurment) 
+          #self.databaseWriter.run(measurment) 
    
       time.sleep(self.fixed_interval)
 
@@ -50,6 +50,7 @@ class Measurment():
     self.hum = hum
     self.temp = temp
     self.mic = mic
+    self.air_quality = None
     
     if air_quality_num == 0 or air_quality_num == 1:
       self.air_quality = "High pollution"
@@ -71,7 +72,6 @@ class Measurment():
   
   def getSound(self):
     return self.mic
-
       
 
 
