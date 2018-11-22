@@ -138,7 +138,7 @@ void microphoneSensor() {
     {
         microseconds = micros();    //Overflows after around 70 minutes!
      
-        vReal[i] = analogRead(0);
+        vReal[i] = analogRead(A2);
         vImag[i] = 0;
      
         while(micros() < (microseconds + sampling_period_us)){
