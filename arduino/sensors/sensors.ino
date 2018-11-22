@@ -20,7 +20,7 @@ arduinoFFT FFT = arduinoFFT();
 //Variables
 float hum;  //Stores humidity value
 float temp; //Stores temperature value
-int peak; //Stores microphone frequency
+double peak; //Stores microphone frequency
 int current_quality; //Stores air quality value
 unsigned int sampling_period_us;
 unsigned long microseconds; 
@@ -62,6 +62,9 @@ void setup()
 
     // Initalize airqualitysensor
     airqualitysensor.init(14);
+ 
+    // microphone sampling period
+    sampling_period_us = round(1000000*(1.0/SAMPLING_FREQUENCY));
 
 }
 
@@ -145,7 +148,7 @@ void microphoneSensor() {
     FFT.Windowing(vReal, SAMPLES, FFT_WIN_TYP_HAMMING, FFT_FORWARD);
     FFT.Compute(vReal, vImag, SAMPLES, FFT_FORWARD);
     FFT.ComplexToMagnitude(vReal, vImag, SAMPLES);
-    double peak = FFT.MajorPeak(vReal, SAMPLES, SAMPLING_FREQUENCY);
+    peak = FFT.MajorPeak(vReal, SAMPLES, SAMPLING_FREQUENCY);
  
 
 }
