@@ -3,16 +3,29 @@ import os
 from random import randint
 
 from databaseWriter import DatabaseWriter
+from databaseWriter import Firestore
 from readSerial import Measurment
 
-if __name__ == '__main__':
+
+def test_database_writer(config):
     print("Testing database writer")
+    database_writer = DatabaseWriter(config)
+    measurement = Measurment(randint(0, 100), randint(0, 100), randint(0, 100), randint(0, 4))
+    database_writer.run(measurement)
 
-    os.getcwd()
-    config_path = os.getcwd() + "/config/defaultConfig.json"
+
+def test_firestore(config):
+    print("Testing firestore")
+    firestore = Firestore(config["api-key"], "")
+    firestore.login(config["email"], config["password"])
+    firestore.refresh()
+
+
+if __name__ == '__main__':
+    config_path = "../config/defaultConfig.json"
     with open(config_path, 'r') as f:
-        datastore = json.load(f)
+        config = json.load(f)
+    config["store_database"] = True
+    test_firestore(config)
+    test_database_writer(config)
 
-    databaseWriter = DatabaseWriter(datastore)
-    measurement = Measurment(randint(0, 100), randint(0, 100), randint(0, 4))
-    databaseWriter.run(measurement)

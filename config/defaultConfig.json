@@ -10,8 +10,10 @@
 
     "store_database": false,
 
-    "firebase-url":  "https://beehive-project-ccf6a.firebaseio.com/",
-    "cluster-id": "PiCluster",
-    "hive-id": "PiHive"
-
+    "firestore-path":  "beehive-project-ccf6a/databases/(default)/documents",
+    "api-key": "AIzaSyA_u4cBRvGO4Vs2i2jqY18A-pOXNuScUrY",
+    "email": "",
+    "password": "",
+    "cluster-id": "0cK5kWv3aF92f0JRbkyC",
+    "hive-id": "axop5QL2ZAQVqJPNex0n"
 }
