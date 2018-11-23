@@ -94,6 +94,7 @@ void airQualitySensor() {
 
     if (flag2 == true) {
       flag2 = false;
+      // capture air quality 
       current_quality=airqualitysensor.slope();
       sendMessage();
     }
@@ -117,6 +118,31 @@ void sendMessage() {
 
 }
 
+void microphoneSensor() {
+   
+    if(flag1 == true){
+      /*SAMPLING*/
+      for(int i=0; i<SAMPLES; i++)
+      {
+          microseconds = micros();    //Overflows after around 70 minutes!
+      
+          vReal[i] = analogRead(A2);
+          vImag[i] = 0;
+      
+          while(micros() < (microseconds + sampling_period_us)){
+          }
+      }
+    /*FFT*/
+      FFT.Windowing(vReal, SAMPLES, FFT_WIN_TYP_HAMMING, FFT_FORWARD);
+      FFT.Compute(vReal, vImag, SAMPLES, FFT_FORWARD);
+      FFT.ComplexToMagnitude(vReal, vImag, SAMPLES);
+      peak = FFT.MajorPeak(vReal, SAMPLES, SAMPLING_FREQUENCY);
+  
+    }
+
+}
+
+
 ISR(TIMER1_COMPA_vect){
 
   //generates pulse wave of frequency 1Hz/2 = 0.5kHz (takes two cycles for full wave- toggle high then toggle low)
@@ -130,26 +156,5 @@ ISR(TIMER1_COMPA_vect){
 }
 
 
- 
-void microphoneSensor() {
-   
-    /*SAMPLING*/
-    for(int i=0; i<SAMPLES; i++)
-    {
-        microseconds = micros();    //Overflows after around 70 minutes!
-     
-        vReal[i] = analogRead(A2);
-        vImag[i] = 0;
-     
-        while(micros() < (microseconds + sampling_period_us)){
-        }
-    }
-  /*FFT*/
-    FFT.Windowing(vReal, SAMPLES, FFT_WIN_TYP_HAMMING, FFT_FORWARD);
-    FFT.Compute(vReal, vImag, SAMPLES, FFT_FORWARD);
-    FFT.ComplexToMagnitude(vReal, vImag, SAMPLES);
-    peak = FFT.MajorPeak(vReal, SAMPLES, SAMPLING_FREQUENCY);
- 
 
-}
 

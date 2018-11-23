@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 import serial
 import time
 import os
@@ -19,7 +18,7 @@ class ReadSerial():
 
     # Connect to Serial Port for communication
     self.ser = serial.Serial(datastore["arduino-settings"]["port"], datastore["arduino-settings"]["baud"], timeout=0)
-    #Setup a loop to send values at fixed intervals in seconds
+    # Setup a loop to send values at fixed intervals in seconds
     self.fixed_interval = datastore["fixed-interval"]
     # create database object 
     self.databaseWriter =  DatabaseWriter(datastore)
@@ -33,6 +32,7 @@ class ReadSerial():
         read_serial = self.ser.readline()
         # example output [Humidity: 24.60; Temperature: 24.00; Quality: 3; Sound: 2] 
         if (read_serial[0:1] == "[" and len(read_serial) == 61  and read_serial[60:61] == "]"):
+          # read sensor data 
           hum = read_serial[11:16]
           temp = read_serial[31:36]
           air_quality_num = read_serial[47:48]
@@ -51,16 +51,7 @@ class Measurment():
     self.hum = hum
     self.temp = temp
     self.mic = mic
-    self.air_quality = None
-    
-    if air_quality_num == 0 or air_quality_num == 1:
-      self.air_quality = "High pollution"
-
-    elif air_quality_num == 2:
-       self.air_quality = "Low pollution"
-
-    elif air_quality_num == 3:
-       self.air_quality = "Fresh air"
+    self.air_quality = air_quality_num
 
   def getTemperature(self):
     return self.temp

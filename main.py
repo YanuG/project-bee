@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 import sys
 
 from readSerial import ReadSerial
@@ -8,7 +7,7 @@ def main(args):
     readSerial.run()
 
 if __name__ == "__main__":
-    # run main when this file is ran directly as an executable (is not imported from another script)
+    # run main 
     try:
       main(sys.argv)
     except KeyboardInterrupt:
