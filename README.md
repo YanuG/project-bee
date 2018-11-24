@@ -20,5 +20,5 @@ CEG capstone project.
 
 2. Upload sensor.ino to the arduino.  
 
-3. To collect the sensor information and upload to firebase run in terminal  `./main.py`
+3. To collect the sensor information and upload to firebase run in terminal  `python main.py`
 
