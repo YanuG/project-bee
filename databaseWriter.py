@@ -7,10 +7,10 @@ import datetime
 class DatabaseWriter:
 
     def __init__(self, datastore):
-        self.firestore = Firestore(datastore["api-key"], datastore["firestore-path"])
-        self.firestore.login(datastore["email"], datastore["password"])
-        self.cluster_id = datastore["cluster-id"]
-        self.hive_id = datastore["hive-id"]
+        self.firestore = Firestore(datastore["firestore"]["api-key"], datastore["firestore"]["firestore-path"])
+        self.firestore.login(datastore["firestore"]["email"], datastore["firestore"]["password"])
+        self.cluster_id = datastore["firestore"]["cluster-id"]
+        self.hive_id = datastore["firestore"]["hive-id"]
         self.store_data = datastore["store_database"]
 
     @staticmethod
