@@ -14,14 +14,14 @@ class ReadSerial():
     config_path = os.getcwd() + "/config/defaultConfig.json"
 
     with open(config_path, 'r') as f:
-        datastore = json.load(f)
+        self.datastore = json.load(f)
 
     # Connect to Serial Port for communication
-    self.ser = serial.Serial(datastore["arduino-settings"]["port"], datastore["arduino-settings"]["baud"], timeout=0)
+    self.ser = serial.Serial(self.datastore["arduino-settings"]["port"], self.datastore["arduino-settings"]["baud"], timeout=0)
     # Setup a loop to send values at fixed intervals in seconds
-    self.fixed_interval = datastore["fixed-interval"]
+    self.fixed_interval = self.datastore["fixed-interval"]
     # create database object 
-    self.databaseWriter =  DatabaseWriter(datastore)
+    self.databaseWriter =  DatabaseWriter(self.datastore)
 
 
   def run(self):
@@ -30,6 +30,8 @@ class ReadSerial():
 
       if self.ser.isOpen():
         read_serial = self.ser.readline()
+	if (self.datastore["display"]):
+		print (read_serial)
         # example output [Humidity: 24.60; Temperature: 24.00; Quality: 3; Sound: 2] 
         if (read_serial[0:1] == "[" and len(read_serial) == 61  and read_serial[60:61] == "]"):
           # read sensor data 
@@ -39,7 +41,7 @@ class ReadSerial():
           mic = read_serial[59:60]
           measurment = Measurment(hum, temp, mic, air_quality_num)
           # send reading to database 
-          self.databaseWriter.run(measurment) 
+          # self.databaseWriter.run(measurment) 
    
       time.sleep(self.fixed_interval)
 
