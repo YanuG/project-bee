@@ -30,7 +30,8 @@
 	 
 
 	boolean tempChanged = false; //Interrupt for temp sensor
-	boolean airChanged = false; //(flag2) Interrupt for air quality sensor	
+	boolean airChanged = false; //Interrupt for air quality sensor
+	boolean soundChanged = false; //Interrupt for microphone
 
 	
 	int counter =0;
@@ -118,26 +119,28 @@
 	
 	void microphoneSensor(){
 	   
-		/*SAMPLING*/
-		for(int i=0; i<SAMPLES; i++){
-			microseconds = micros();    //Overflows after around 70 minutes!
+		if (soundChanged == true){
+			soundChanged = false;
+		
+			/*SAMPLING*/
+			for(int i=0; i<SAMPLES; i++){
+				microseconds = micros();    //Overflows after around 70 minutes!
 		 
-			vReal[i] = analogRead(A2); //Read real part of data from pin A2 and store it in array vReal
-			vImag[i] = 0; //Imaginary part of data is set to 0
+				vReal[i] = analogRead(A2); //Read real part of data from pin A2 and store it in array vReal
+				vImag[i] = 0; //Imaginary part of data is set to 0
 		 
-			while(micros() < (microseconds + sampling_period_us)){}
+				while(micros() < (microseconds + sampling_period_us)){}
+			}
+	 
+	 
+			/*FFT*/
+			FFT.Windowing(vReal, SAMPLES, FFT_WIN_TYP_HAMMING, FFT_FORWARD); //
+			FFT.Compute(vReal, vImag, SAMPLES, FFT_FORWARD); //
+			FFT.ComplexToMagnitude(vReal, vImag, SAMPLES); //Convert the complex number vReal, vImag into a magnitude
+			freq = FFT.MajorPeak(vReal, SAMPLES, SAMPLING_FREQUENCY); //Store maximum frequency value (peak) in freq
+	 
 		}
-	 
-	 
-		/*FFT*/
-		FFT.Windowing(vReal, SAMPLES, FFT_WIN_TYP_HAMMING, FFT_FORWARD); //
-		FFT.Compute(vReal, vImag, SAMPLES, FFT_FORWARD); //
-		FFT.ComplexToMagnitude(vReal, vImag, SAMPLES); //Convert the complex number vReal, vImag into a magnitude
-		freq = FFT.MajorPeak(vReal, SAMPLES, SAMPLING_FREQUENCY); //Store maximum frequency value (peak) in freq
-	 
-
 	}
-
 	
 	//Prints serial message including the sensors values
 	void sendMessage(){
