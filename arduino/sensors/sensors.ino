@@ -17,7 +17,10 @@
 	#define SAMPLES 128             //Must be a power of 2
 	#define SAMPLING_FREQUENCY 9999 //Hz, must be less than 10000 due to ADC
 
-	
+  //Pins
+  const int LIGHT_PIN0 = A3;
+  const int LIGHT_PIN1 = A4;
+  
 	//Variables
 	float hum;  //Stores humidity value
 	float temp; //Stores temperature value
@@ -27,13 +30,21 @@
 	long microseconds; 
 	double vReal[SAMPLES]; //Stores real part of microphone frequency
 	double vImag[SAMPLES]; //Stores imaginary part of microphone frequency
+  int numBees; //Stores the number of bees inside the hive
+  int lightThreshold = 10; //could be changed later
+  int curState = -1;
+  int prevState = -1;
+  // states are (' means it is blocked):
+  // both unblocked = 0
+  // outside', inside = 1
+  // outside', inside' = 2
+  // outside, inside' = 3
 	 
 
 	boolean tempChanged = false; //Interrupt for temp sensor
-	boolean airChanged = false; //Interrupt for air quality sensor
-
-
-	
+	boolean airChanged = false; //(flag2) Interrupt for air quality sensor
+  boolean dislaySerial = false; // interrupt for serial write	
+	 
 	int counter =0;
 
 	
@@ -68,6 +79,12 @@
 
 		airqualitysensor.init(14); //Initalize airqualitysensor
 
+    //Initialize Pins for Bee counter
+    pinMode(LIGHT_PIN0, INPUT); 
+    pinMode(LIGHT_PIN1, INPUT);
+
+    numBees = 10;
+
 	}
 
 	
@@ -76,7 +93,11 @@
 	   temperatureSensor();
 	   microphoneSensor();
 	   airQualitySensor();
-	  
+     beeCounter();
+     if (dislaySerial)
+        sendMessage();
+     
+     
 	}
 
 
@@ -92,6 +113,42 @@
 			tempChanged=true;
 		}
 	}
+
+  void changeState(int nextState){
+//    Serial.print("curState: ");
+//    Serial.println(curState);
+//    Serial.print("prevState: ");
+//    Serial.println(prevState);
+    if(nextState != curState){
+      prevState = curState;
+      curState = nextState;
+      if(curState == 0){ //bees have finished entering/exiting
+        if(prevState == 1){
+          --numBees;
+//          Serial.print("numBees: ");
+//          Serial.println(numBees);
+        }else if(prevState == 3){
+          ++numBees;
+//          Serial.print("numBees: ");
+//          Serial.println(numBees);
+        }
+      }
+    }
+  }
+
+  void beeCounter(){
+    int outside = analogRead(LIGHT_PIN0);
+    int inside = analogRead(LIGHT_PIN1);
+    if(outside > lightThreshold && inside > lightThreshold){ //both unblocked
+      changeState(0);
+    }else if(outside < lightThreshold && inside > lightThreshold){ //outside is blocked
+      changeState(1);
+    }else if(outside < lightThreshold && inside < lightThreshold){ //both blocked
+      changeState(2);
+    }else if(outside > lightThreshold && inside < lightThreshold){ //inside is blocked 
+      changeState(3); 
+    }
+  }
 
 
 	void temperatureSensor(){
@@ -110,8 +167,8 @@
 
 		if (airChanged == true){
 			airChanged = false;
-			current_quality=airqualitysensor.slope(); //Capture air quality 
-			sendMessage();
+			current_quality=airqualitysensor.slope();
+      dislaySerial = true;
 		}
 	  
 	}
@@ -119,39 +176,47 @@
 	
 	void microphoneSensor(){
 	   
-		if(tempChanged == true){
-				
-			/*SAMPLING*/
-			for(int i=0; i<SAMPLES; i++){
-				microseconds = micros();    //Overflows after around 70 minutes!
+		/*SAMPLING*/
+		for(int i=0; i<SAMPLES; i++){
+			microseconds = micros();    //Overflows after around 70 minutes!
 		 
-				vReal[i] = analogRead(A2); //Read real part of data from pin A2 and store it in array vReal
-				vImag[i] = 0; //Imaginary part of data is set to 0
+			vReal[i] = analogRead(A2); //Read real part of data from pin A2 and store it in array vReal
+			vImag[i] = 0; //Imaginary part of data is set to 0
 		 
-				while(micros() < (microseconds + sampling_period_us)){}
-			}
-	 
-	 
-			/*FFT*/
-			FFT.Windowing(vReal, SAMPLES, FFT_WIN_TYP_HAMMING, FFT_FORWARD); //
-			FFT.Compute(vReal, vImag, SAMPLES, FFT_FORWARD); //
-			FFT.ComplexToMagnitude(vReal, vImag, SAMPLES); //Convert the complex number vReal, vImag into a magnitude
-			freq = FFT.MajorPeak(vReal, SAMPLES, SAMPLING_FREQUENCY); //Store maximum frequency value (peak) in freq
-	 
+			while(micros() < (microseconds + sampling_period_us)){}
 		}
+	 
+	 
+		/*FFT*/
+		FFT.Windowing(vReal, SAMPLES, FFT_WIN_TYP_HAMMING, FFT_FORWARD); //
+		FFT.Compute(vReal, vImag, SAMPLES, FFT_FORWARD); //
+		FFT.ComplexToMagnitude(vReal, vImag, SAMPLES); //Convert the complex number vReal, vImag into a magnitude
+		freq = FFT.MajorPeak(vReal, SAMPLES, SAMPLING_FREQUENCY); //Store maximum frequency value (peak) in freq
+    
+	 
+
 	}
+
 	
 	//Prints serial message including the sensors values
 	void sendMessage(){
 
 		msg = "[Humidity: ";
+    if (hum < 10) 
+      msg+=0;
 		msg += hum;
 		msg += "; Temperature: ";
+    if (temp < 10) 
+      msg+=0;
 		msg += temp;
 		msg += "; Quality: ";
 		msg += current_quality;
 		msg += "; Sound: ";
+    if (freq < 1000) 
+      msg+=0;
 		msg += freq;
+    msg += "; Number of Bees: ";
+    msg += numBees;
 		msg += "] \n";
 		
 		Serial.print(msg);

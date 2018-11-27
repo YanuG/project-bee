@@ -30,30 +30,32 @@ class ReadSerial():
 
       if self.ser.isOpen():
         read_serial = self.ser.readline()
-	if (self.datastore["display"]):
-		print (read_serial)
+        if (self.datastore["display"]):
+          print (read_serial)
         # example output [Humidity: 24.60; Temperature: 24.00; Quality: 3; Sound: 2] 
-        if (read_serial[0:1] == "[" and len(read_serial) == 61  and read_serial[60:61] == "]"):
+        if (read_serial[0:1] == "[" and len(read_serial) == 87  and read_serial[84:85] == "]"):
           # read sensor data 
           hum = read_serial[11:16]
           temp = read_serial[31:36]
           air_quality_num = read_serial[47:48]
           mic = read_serial[59:60]
-          measurment = Measurment(hum, temp, mic, air_quality_num)
+          beeCount = read_serial[82:84]
+          measurment = Measurment(hum, temp, mic, air_quality_num, beeCount)
           # send reading to database 
-          # self.databaseWriter.run(measurment) 
+          self.databaseWriter.run(measurment) 
    
       time.sleep(self.fixed_interval)
 
                  
 class Measurment():
   
-  def __init__(self, hum, temp, mic, air_quality_num):
+  def __init__(self, hum, temp, mic, air_quality_num, beeCount):
 
     self.hum = hum
     self.temp = temp
     self.mic = mic
     self.air_quality = air_quality_num
+    self.beeCount = beeCount
 
   def getTemperature(self):
     return self.temp
@@ -66,6 +68,9 @@ class Measurment():
   
   def getSound(self):
     return self.mic
+
+  def getBeeCount(self):
+    return self.beeCount 
       
 
 
