@@ -31,7 +31,7 @@
 
 	boolean tempChanged = false; //Interrupt for temp sensor
 	boolean airChanged = false; //Interrupt for air quality sensor
-	boolean soundChanged = false; //Interrupt for microphone
+
 
 	
 	int counter =0;
@@ -110,7 +110,7 @@
 
 		if (airChanged == true){
 			airChanged = false;
-			current_quality=airqualitysensor.slope();
+			current_quality=airqualitysensor.slope(); //Capture air quality 
 			sendMessage();
 		}
 	  
@@ -119,9 +119,8 @@
 	
 	void microphoneSensor(){
 	   
-		if (soundChanged == true){
-			soundChanged = false;
-		
+		if(tempChanged == true){
+				
 			/*SAMPLING*/
 			for(int i=0; i<SAMPLES; i++){
 				microseconds = micros();    //Overflows after around 70 minutes!
