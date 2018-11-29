@@ -3,13 +3,13 @@ from random import randint
 
 from databaseWriter import DatabaseWriter
 from databaseWriter import Firestore
-from readSerial import Measurment
+from readSerial import Measurement
 
 
 def test_database_writer(firestore_config):
     print("Testing database writer")
     database_writer = DatabaseWriter(firestore_config)
-    measurement = Measurment(randint(0, 100), randint(0, 100), randint(0, 100), randint(0, 4), randint(0, 100))
+    measurement = Measurement(randint(0, 100), randint(0, 100), randint(0, 100), randint(0, 4), randint(0, 100))
     database_writer.save_measurement(measurement)
 
 
