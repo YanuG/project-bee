@@ -45,7 +45,7 @@ class ReadSerial():
           measurment = Measurment(hum, temp, mic, air_quality_num, beeCount)
           # send reading to database
           if self.save_to_cloud:
-            self.database_writer.run(measurment)
+            self.database_writer.save_measurement(measurment)
    
       time.sleep(self.fixed_interval)
 

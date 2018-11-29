@@ -10,7 +10,7 @@ def test_database_writer(firestore_config):
     print("Testing database writer")
     database_writer = DatabaseWriter(firestore_config)
     measurement = Measurment(randint(0, 100), randint(0, 100), randint(0, 100), randint(0, 4), randint(0, 100))
-    database_writer.run(measurement)
+    database_writer.save_measurement(measurement)
 
 
 def test_firestore(firestore_config):

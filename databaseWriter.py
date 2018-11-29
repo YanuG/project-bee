@@ -35,7 +35,7 @@ class DatabaseWriter:
             }
         }
 
-    def run(self, measurement):
+    def save_measurement(self, measurement):
         path = "/measurements/%s/hives/%s/measurements" % (self.cluster_id, self.hive_id)
         payload = self.measurement_to_document(measurement)
         self.firestore.add_document(path, payload)
