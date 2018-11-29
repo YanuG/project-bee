@@ -26,12 +26,12 @@ class DatabaseWriter:
         return {
             "fields": {
                 "date": {"timestampValue": datetime.datetime.utcnow().isoformat("T") + "Z"},
-                "temperature": {"integerValue": str(measurement.temp)},
-                "humidity": {"integerValue": str(measurement.hum)},
+                "temperature": {"integerValue": str(measurement.temperature)},
+                "humidity": {"integerValue": str(measurement.humidity)},
                 "air_quality": {"integerValue": str(measurement.air_quality)},
                 # "mass": {"integerValue": str(measurement.mass)},
-                "bees": {"integerValue": str(measurement.beeCount)},
-                "frequency": {"integerValue": str(int(measurement.mic))}
+                "bees": {"integerValue": str(measurement.bee_count)},
+                "frequency": {"integerValue": str(int(measurement.frequency))}
             }
         }
 
