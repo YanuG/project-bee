@@ -28,10 +28,10 @@ class DatabaseWriter:
                 "date": {"timestampValue": datetime.datetime.utcnow().isoformat("T") + "Z"},
                 "temperature": {"integerValue": str(measurement.temp)},
                 "humidity": {"integerValue": str(measurement.hum)},
-                # "air_quality": {"integerValue": str(measurement.air)},
+                "air_quality": {"integerValue": str(measurement.air_quality)},
                 # "mass": {"integerValue": str(measurement.mass)},
-                # "bees": {"integerValue": str(measurement.bee_count)},
-                "frequency": {"integerValue": str(measurement.mic)}
+                "bees": {"integerValue": str(measurement.beeCount)},
+                "frequency": {"integerValue": str(int(measurement.mic))}
             }
         }
 
