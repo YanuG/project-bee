@@ -37,8 +37,8 @@ class ReadSerial:
         # example output [Humidity: 24.60; Temperature: 24.00; Quality: 3; Sound: 2] 
         if (read_serial[0:1] == "[" and len(read_serial) == 87  and read_serial[84:85] == "]"):
           # read sensor data 
-          humidity = read_serial[11:16]
-          temperature = read_serial[31:36]
+          humidity = float(read_serial[11:16])
+          temperature = float(read_serial[31:36])
           air_quality = read_serial[47:48]
           frequency = read_serial[59:60]
           bee_count = read_serial[82:84]
