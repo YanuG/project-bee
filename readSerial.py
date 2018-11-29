@@ -32,7 +32,7 @@ class ReadSerial:
 
       if self.ser.isOpen():
         read_serial = self.ser.readline()
-        if (self.datastore["display"]):
+        if (self.datastore["display"] and len(read_serial) == 87 ):
           print (read_serial)
         # example output [Humidity: 24.60; Temperature: 24.00; Quality: 3; Sound: 2] 
         if (read_serial[0:1] == "[" and len(read_serial) == 87  and read_serial[84:85] == "]"):

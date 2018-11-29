@@ -10,7 +10,7 @@
 
     "fixed-interval":  2,
 
-    "save_to_cloud": false,
+    "save_to_cloud": true,
     "firestore": {
         "base-path":  "beehive-project-ccf6a/databases/(default)/documents",
         "api-key": "AIzaSyA_u4cBRvGO4Vs2i2jqY18A-pOXNuScUrY",
