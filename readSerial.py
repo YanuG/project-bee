@@ -20,8 +20,10 @@ class ReadSerial():
     self.ser = serial.Serial(self.datastore["arduino-settings"]["port"], self.datastore["arduino-settings"]["baud"], timeout=0)
     # Setup a loop to send values at fixed intervals in seconds
     self.fixed_interval = self.datastore["fixed-interval"]
-    # create database object 
-    self.databaseWriter =  DatabaseWriter(self.datastore)
+
+    # Create repository object
+    self.save_to_cloud = self.datastore["save_to_cloud"]
+    self.database_writer = DatabaseWriter(self.datastore["firestore"])
 
 
   def run(self):
@@ -41,8 +43,9 @@ class ReadSerial():
           mic = read_serial[59:60]
           beeCount = read_serial[82:84]
           measurment = Measurment(hum, temp, mic, air_quality_num, beeCount)
-          # send reading to database 
-          self.databaseWriter.run(measurment) 
+          # send reading to database
+          if self.save_to_cloud:
+            self.database_writer.save_measurement(measurment)
    
       time.sleep(self.fixed_interval)
 

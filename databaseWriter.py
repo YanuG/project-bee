@@ -6,12 +6,20 @@ import datetime
 
 class DatabaseWriter:
 
-    def __init__(self, datastore):
-        self.firestore = Firestore(datastore["firestore"]["api-key"], datastore["firestore"]["firestore-path"])
-        self.firestore.login(datastore["firestore"]["email"], datastore["firestore"]["password"])
-        self.cluster_id = datastore["firestore"]["cluster-id"]
-        self.hive_id = datastore["firestore"]["hive-id"]
-        self.store_data = datastore["store_database"]
+    def __init__(self, firestore_config):
+        # Save the cluster and hive ID corresponding to this unit
+        self.cluster_id = firestore_config["cluster-id"]
+        self.hive_id = firestore_config["hive-id"]
+        # Create the firestore client
+        self.firestore = Firestore(firestore_config["api-key"], firestore_config["base-path"])
+        # Get the credentials from the config or command line
+        email = firestore_config["email"] \
+            if "email" in firestore_config \
+            else input("Email: ")
+        password = firestore_config["password"] \
+            if "password" in firestore_config \
+            else input("Password: ")
+        self.firestore.login(email, password)
 
     @staticmethod
     def measurement_to_document(measurement):
@@ -27,11 +35,10 @@ class DatabaseWriter:
             }
         }
 
-    def run(self, measurement):
-        if self.store_data:
-            path = "/measurements/%s/hives/%s/measurements" % (self.cluster_id, self.hive_id)
-            payload = self.measurement_to_document(measurement)
-            self.firestore.add_document(path, payload)
+    def save_measurement(self, measurement):
+        path = "/measurements/%s/hives/%s/measurements" % (self.cluster_id, self.hive_id)
+        payload = self.measurement_to_document(measurement)
+        self.firestore.add_document(path, payload)
 
 
 class Firestore:
@@ -39,9 +46,9 @@ class Firestore:
     REFRESH_URL = "https://securetoken.googleapis.com/v1/token?key="
     FIRESTORE_URL = "https://firestore.googleapis.com/v1beta1/projects/"
 
-    def __init__(self, api_key, firestore_path):
+    def __init__(self, api_key, base_path):
         self.api_key = api_key
-        self.url = Firestore.FIRESTORE_URL + firestore_path
+        self.url = Firestore.FIRESTORE_URL + base_path
         self.refresh_token = None
         self.id_token = None
         self.user_id = None
@@ -52,7 +59,8 @@ class Firestore:
         if "error" in payload:
             print(payload)
             error = payload["error"]
-            raise FirestoreError(error["code"], error["message"], error["errors"] if "errors" in error else None)
+            details = error["errors"] if "errors" in error else None
+            raise FirestoreError(error["code"], error["message"], details)
 
     def login(self, email, password):
         response = requests.post(Firestore.LOGIN_URL + self.api_key, {
