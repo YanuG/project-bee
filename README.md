@@ -1,6 +1,7 @@
-# project-bee
+# Project Bee Backend
+## CEG4912 Capstone Project
 
-CEG capstone project. 
+For the frontend portion of this project: [Click Here](https://github.com/albert-fung/Project-Bee)
 
 ## Software Requirments 
 
@@ -16,9 +17,11 @@ CEG capstone project.
 
 ## Run Project
 
-1. Add DHT-Library to arduino.   
+1. Add DHT-Library to arduino. 
 
-2. Upload sensor.ino to the arduino.  
+2. Upload sensor.ino to the arduino. 
 
 3. To collect the sensor information and upload to firebase run in terminal  `python main.py`
 
+## Running Tests
+To test the DatabaseWriter.py (without the hardware), DatabaseWriterTest.py can be used to populate Firestore with a new measurement value. 
