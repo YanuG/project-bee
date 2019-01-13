@@ -1,6 +1,6 @@
 import serial
 import time
-import os
+from pathlib2 import Path
 import json
 
 from databaseWriter import DatabaseWriter
@@ -10,20 +10,21 @@ class ReadSerial:
 
   def __init__(self):
 
-    os.getcwd()
-    config_path = os.getcwd() + "/config/defaultConfig.json"
+    project_root = Path(__file__).resolve().parent.parent
+    config_path = project_root/"config/defaultConfig.json"
 
-    with open(config_path, 'r') as f:
-        self.datastore = json.load(f)
+    with open(str(config_path), 'r') as f:
+        config_file = json.load(f)
+
 
     # Connect to Serial Port for communication
-    self.ser = serial.Serial(self.datastore["arduino-settings"]["port"], self.datastore["arduino-settings"]["baud"], timeout=0)
+    self.ser = serial.Serial(self.config_file["arduino-settings"]["port"], self.config_file["arduino-settings"]["baud"], timeout=0)
     # Setup a loop to send values at fixed intervals in seconds
-    self.fixed_interval = self.datastore["fixed-interval"]
+    self.fixed_interval = self.config_file["fixed-interval"]
 
     # Create repository object
-    self.save_to_cloud = self.datastore["save_to_cloud"]
-    self.database_writer = DatabaseWriter(self.datastore["firestore"])
+    self.save_to_cloud = self.config_file["save_to_cloud"]
+    self.database_writer = DatabaseWriter(self.config_file["firestore"])
 
 
   def run(self):
@@ -32,7 +33,7 @@ class ReadSerial:
 
       if self.ser.isOpen():
         read_serial = self.ser.readline()
-        if (self.datastore["display"] and len(read_serial) == 87 ):
+        if (self.config_file["display"] and len(read_serial) == 87 ):
           print (read_serial)
         # example output [Humidity: 24.60; Temperature: 24.00; Quality: 3; Sound: 2] 
         if (read_serial[0:1] == "[" and len(read_serial) == 87  and read_serial[84:85] == "]"):
@@ -51,9 +52,11 @@ class ReadSerial:
 
                  
 class Measurement:
-  def __init__(self, humidity, temperature, frequency, air_quality, bee_count):
-    self.humidity = humidity
-    self.temperature = temperature
-    self.frequency = frequency
-    self.air_quality = air_quality
-    self.bee_count = bee_count
+  
+    def __init__(self, humidity, temperature, frequency, air_quality, bee_count):
+        
+        self.humidity = humidity
+        self.temperature = temperature
+        self.frequency = frequency
+        self.air_quality = air_quality
+        self.bee_count = bee_count
