@@ -28,9 +28,13 @@ class DatabaseWriter:
         # Create local file to store measurment information
         self.conn =  sqlite3.connect(config_file["offline-database-filename"])
         self.cursor = conn.cursor()
-        # Create table 
-        self.cursor.execute('''CREATE TABLE measurments
-             (date, temperature, humidity, air_quality, bees, frequency)''')
+
+        # Check if table exists
+        try:
+            self.cursor.execute("SELECT * FROM measurments")
+        except Exception as e:
+            self.cursor.execute('''CREATE TABLE measurments
+                (date, temperature, humidity, air_quality, bees, frequency)''')
         
 
     @staticmethod
@@ -55,7 +59,7 @@ class DatabaseWriter:
 
         # save measurments into offline database
         self.cursor.execute("INSERT INTO measurments VALUES (? , ? , ?, ?, ?, ?) " , 
-            (datetime.datetime.utcnow().isoformat("T") , measurement.temperature, measurement.humidity, measurement.air_quality, measurement.bee_count, measurement.frequency) )
+            (datetime.datetime.utcnow().isoformat("T") , measurement.temperature, measurement.humidity, measurement.air_quality, measurement.bee_count, measurement.frequency))
         self.conn.commit()
 
 class Firestore:
