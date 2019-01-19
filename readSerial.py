@@ -2,58 +2,61 @@ import serial
 import time
 import os
 import json
+import sched, time
 
 from databaseWriter import DatabaseWriter
 
-
 class ReadSerial:
 
-  def __init__(self):
+    def __init__(self):
 
-    os.getcwd()
-    config_path = os.getcwd() + "/config/defaultConfig.json"
+        os.getcwd()
+        config_path = os.getcwd() + "/config/defaultConfig.json"
 
-    with open(config_path, 'r') as f:
-        self.datastore = json.load(f)
+        with open(config_path, 'r') as f:
+            self.datastore = json.load(f)
 
-    # Connect to Serial Port for communication
-    self.ser = serial.Serial(self.datastore["arduino-settings"]["port"], self.datastore["arduino-settings"]["baud"], timeout=0)
-    # Setup a loop to send values at fixed intervals in seconds
-    self.fixed_interval = self.datastore["fixed-interval"]
+        # Connect to Serial Port for communication
+        self.ser = serial.Serial(self.datastore["arduino-settings"]["port"], self.datastore["arduino-settings"]["baud"], timeout=0)
+        # Setup a loop to send values at fixed intervals in seconds
+        self.fixed_interval = self.datastore["fixed-interval"]
 
-    # Create repository object
-    self.save_to_cloud = self.datastore["save_to_cloud"]
-    self.database_writer = DatabaseWriter(self.datastore["firestore"])
+        # Create repository object
+        self.save_to_cloud = self.datastore["save_to_cloud"]
+        #self.database_writer = DatabaseWriter(self.datastore["firestore"])
+        self.start_timer = time.time() 
 
+    def run(self):
+ 
+        while True: 
 
-  def run(self):
+            if self.ser.isOpen():
+                read_serial = self.ser.readline()
 
-    while True: 
+            if (self.datastore["display"]):
+                print read_serial
+            if (len(read_serial) == 27):
+                # read sensor data 
+                humidity = int(read_serial[0:4], 16)
+                temperature = int(read_serial[5:9], 16)
+                air_quality = int(read_serial[10:13], 16)
+                frequency = int(read_serial[14:19], 16)
+                bee_count = int(read_serial[20:24], 16)
+                measurement = Measurement(humidity, temperature, frequency, air_quality, bee_count)
 
-      if self.ser.isOpen():
-        read_serial = self.ser.readline()
-        if (self.datastore["display"] and len(read_serial) == 87 ):
-          print (read_serial)
-        # example output [Humidity: 24.60; Temperature: 24.00; Quality: 3; Sound: 2] 
-        if (read_serial[0:1] == "[" and len(read_serial) == 87  and read_serial[84:85] == "]"):
-          # read sensor data 
-          humidity = float(read_serial[11:16])
-          temperature = float(read_serial[31:36])
-          air_quality = read_serial[47:48]
-          frequency = read_serial[59:60]
-          bee_count = read_serial[82:84]
-          measurement = Measurement(humidity, temperature, frequency, air_quality, bee_count)
-          # send reading to database
-          if self.save_to_cloud:
-            self.database_writer.save_measurement(measurement)
-   
-      time.sleep(self.fixed_interval)
+            if time.time() - self.start_timer >= 20:
+                if self.save_to_cloud:
+                    self.database_writer.save_measurement(measurement)
+                self.start_timer = time.time()
 
-                 
+            time.sleep(self.fixed_interval)
+                  
 class Measurement:
-  def __init__(self, humidity, temperature, frequency, air_quality, bee_count):
-    self.humidity = humidity
-    self.temperature = temperature
-    self.frequency = frequency
-    self.air_quality = air_quality
-    self.bee_count = bee_count
+    
+    def __init__(self, humidity, temperature, frequency, air_quality, bee_count):
+        
+        self.humidity = humidity
+        self.temperature = temperature
+        self.frequency = frequency
+        self.air_quality = air_quality
+        self.bee_count = bee_count
