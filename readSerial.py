@@ -9,10 +9,10 @@ from databaseWriter import DatabaseWriter
 class ReadSerial:
     def __init__(self):
 
-        project_root = Path(__file__).resolve().parent.parent
+        project_root = Path(__file__).resolve().parent
         config_path = project_root/"config/defaultConfig.json"
         with open(str(config_path), 'r') as f:
-            config_file = json.load(f)
+            self.config_file = json.load(f)
         # Connect to Serial Port for communication
         self.ser = serial.Serial(self.config_file["arduino-settings"]["port"], self.config_file["arduino-settings"]["baud"], timeout=0)
         # Setup a loop to send values at fixed intervals in seconds
@@ -26,7 +26,7 @@ class ReadSerial:
         while True: 
             if self.ser.isOpen():
                 read_serial = self.ser.readline()
-            if (self.datastore["display"]):
+            if (self.config_file["display"]):
                 print read_serial
             if (len(read_serial) == 27):
                 # read sensor data 
@@ -36,7 +36,7 @@ class ReadSerial:
                 frequency = int(read_serial[14:19], 16)
                 bee_count = int(read_serial[20:24], 16)
                 measurement = Measurement(humidity, temperature, frequency, air_quality, bee_count)
-            if time.time() - self.start_timer >= self.datastore["write-to-database"]:
+            if time.time() - self.start_timer >= self.config_file["write-to-database"]:
                 if self.save_to_cloud:
                     self.database_writer.save_measurement(measurement)
                 self.start_timer = time.time()
