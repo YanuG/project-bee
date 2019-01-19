@@ -1,6 +1,6 @@
 import serial
 import time
-import os
+from pathlib2 import Path
 import json
 import sched, time
 
@@ -9,17 +9,17 @@ from databaseWriter import DatabaseWriter
 class ReadSerial:
     def __init__(self):
 
-        os.getcwd()
-        config_path = os.getcwd() + "/config/defaultConfig.json"
-        with open(config_path, 'r') as f:
-            self.datastore = json.load(f)
+        project_root = Path(__file__).resolve().parent.parent
+        config_path = project_root/"config/defaultConfig.json"
+        with open(str(config_path), 'r') as f:
+            config_file = json.load(f)
         # Connect to Serial Port for communication
-        self.ser = serial.Serial(self.datastore["arduino-settings"]["port"], self.datastore["arduino-settings"]["baud"], timeout=0)
+        self.ser = serial.Serial(self.config_file["arduino-settings"]["port"], self.config_file["arduino-settings"]["baud"], timeout=0)
         # Setup a loop to send values at fixed intervals in seconds
-        self.fixed_interval = self.datastore["fixed-interval"]
+        self.fixed_interval = self.config_file["fixed-interval"]
         # Create repository object
-        self.save_to_cloud = self.datastore["save_to_cloud"]
-        #self.database_writer = DatabaseWriter(self.datastore["firestore"])
+        self.save_to_cloud = self.config_file["save_to_cloud"]
+        self.database_writer = DatabaseWriter(self.config_file["firestore"])
         self.start_timer = time.time() 
 
     def run(self):
@@ -43,7 +43,6 @@ class ReadSerial:
             time.sleep(self.fixed_interval)
                   
 class Measurement:
-    
     def __init__(self, humidity, temperature, frequency, air_quality, bee_count):
         self.humidity = humidity
         self.temperature = temperature

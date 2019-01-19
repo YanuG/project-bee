@@ -11,6 +11,7 @@
     "fixed-interval":  2,
 
     "save_to_cloud": false,
+
     "firestore": {
         "base-path":  "beehive-project-ccf6a/databases/(default)/documents",
         "api-key": "AIzaSyA_u4cBRvGO4Vs2i2jqY18A-pOXNuScUrY",
@@ -18,6 +19,8 @@
         "password": "password",
         "cluster-id": "0cK5kWv3aF92f0JRbkyC",
         "hive-id": "axop5QL2ZAQVqJPNex0n"
-	}
+    },
+
+    "offline-database-filename": "local-beehive-measurments.db"
 
 }
