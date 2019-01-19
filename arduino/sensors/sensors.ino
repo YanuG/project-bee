@@ -22,15 +22,14 @@
   const int LIGHT_PIN1 = A4;
   
 	//Variables
-	float hum;  //Stores humidity value
-	float temp; //Stores temperature value
-	double freq; //Stores microphone maximum frequency value
-	int current_quality; //Stores air quality value
+	int hum, temp;  //Stores humidity and temperature values
+  int current_quality; //Stores air quality value
+  int freq; //Stores microphone maximum frequency value
 	int sampling_period_us;
 	long microseconds; 
 	double vReal[SAMPLES]; //Stores real part of microphone frequency
 	double vImag[SAMPLES]; //Stores imaginary part of microphone frequency
-  int numBees; //Stores the number of bees inside the hive
+  int numBees; //Stores the number of bees inside the hive (int)
   int lightThreshold = 10; //could be changed later
   int curState = -1;
   int prevState = -1;
@@ -41,61 +40,48 @@
   // outside, inside' = 3
 	 
 
-	boolean tempChanged = false; //Interrupt for temp sensor
-	boolean airChanged = false; //(flag2) Interrupt for air quality sensor
-  boolean dislaySerial = false; // interrupt for serial write	
-	 
+	boolean sensor_interrupt = false; //Interrupt for sensors
 	int counter =0;
-
-	
 	int delaytime = 200; //Time for interrupt
 
 
-	String msg; //msg to send through serial
-
 	
 	void setup(){
-	 
-		Serial.begin(9600);   //Set serial baud
-
+  
+    //Set serial baud
+		Serial.begin(9600);   
 		cli();//stop interrupts
 	 
 		//set timer1 interrupt at 1kHz
 		TCCR1A = 0; // set entire TCCR1A register to 0
 		TCNT1  = 0; //initialize counter value to 0
-	 
 		// set timer count for 1khz increments
 		OCR1A = 1999; // = (16*10^6) / (1000*8) - 1; 
-					  //had to use 16 bit timer1 for this bc 1999>255, but could switch to timers 0 or 2 with larger prescaler
-	 
-		
 		TCCR1B |= (1 << WGM12); //Turn on CTC mode
-		
 		TCCR1B |= (1 << CS11);  //Set CS11 bit for 8 prescaler
-
 		TIMSK1 |= (1 << OCIE1A); //Enable timer compare interrupt
-		
 		sei(); //Allow interrupts
 
-		airqualitysensor.init(14); //Initalize airqualitysensor
+    //Initalize airqualitysensor
+		airqualitysensor.init(14);
 
     //Initialize Pins for Bee counter
     pinMode(LIGHT_PIN0, INPUT); 
     pinMode(LIGHT_PIN1, INPUT);
-
-    numBees = 10;
 
 	}
 
 	
 	void loop(){
 
-	   temperatureSensor();
-	   microphoneSensor();
-	   airQualitySensor();
-     beeCounter();
-     if (dislaySerial)
+     if (sensor_interrupt){
+        temperatureSensor();
+        airQualitySensor();
         sendMessage();
+     }
+	   
+	   microphoneSensor();
+     beeCounter();
      
      
 	}
@@ -110,7 +96,7 @@
 		}
 		else{
 			counter = 0;
-			tempChanged=true;
+		  sensor_interrupt = true;
 		}
 	}
 
@@ -153,25 +139,19 @@
 
 	void temperatureSensor(){
 
-	   if(tempChanged == true){
-			tempChanged = false;
-			int chk = DHT.read22(DHT22_PIN);
-			hum = DHT.humidity;     //Read data and store it to variable hum
-			temp= DHT.temperature;  //Read data and store it to variable temp
-			airChanged = true;
-	   }
+	
+		DHT.read22(DHT22_PIN);
+		hum = DHT.humidity;     //Read data and store it to variable hum
+		temp= DHT.temperature;  //Read data and store it to variable temp
+
 	}
 
 	
 	void airQualitySensor(){
 
-		if (airChanged == true){
-			airChanged = false;
-			current_quality=airqualitysensor.slope();
-      dislaySerial = true;
-		}
-	  
+		current_quality= airqualitysensor.slope();  
 	}
+ 
 
 	
 	void microphoneSensor(){
@@ -192,34 +172,29 @@
 		FFT.Compute(vReal, vImag, SAMPLES, FFT_FORWARD); //
 		FFT.ComplexToMagnitude(vReal, vImag, SAMPLES); //Convert the complex number vReal, vImag into a magnitude
 		freq = FFT.MajorPeak(vReal, SAMPLES, SAMPLING_FREQUENCY); //Store maximum frequency value (peak) in freq
-    
 	 
 
 	}
 
+
+void convertToHex(int value, int precision) {
+
+    char tmp[16];
+    char format[128];
+    sprintf(format, "0x%%.%dX", precision);
+    sprintf(tmp, format, value);
+    Serial.print(tmp);
+    Serial.print(" ");
+  }
+
 	
-	//Prints serial message including the sensors values
 	void sendMessage(){
 
-		msg = "[Humidity: ";
-    if (hum < 10) 
-      msg+=0;
-		msg += hum;
-		msg += "; Temperature: ";
-    if (temp < 10) 
-      msg+=0;
-		msg += temp;
-		msg += "; Quality: ";
-		msg += current_quality;
-		msg += "; Sound: ";
-    if (freq < 1000) 
-      msg+=0;
-		msg += freq;
-    msg += "; Number of Bees: ";
-    msg += numBees;
-		msg += "] \n";
-		
-		Serial.print(msg);
+		convertToHex(hum , 2);
+    convertToHex(temp, 2);
+		convertToHex(current_quality, 1);
+    convertToHex(freq, 3);
+    convertToHex(numBees, 2);
 
 
 	}
