@@ -35,7 +35,8 @@ class ReadSerial:
                 air_quality = int(read_serial[10:13], 16)
                 frequency = int(read_serial[14:19], 16)
                 bee_count = int(read_serial[20:24], 16)
-                measurement = Measurement(humidity, temperature, frequency, air_quality, bee_count)
+                weight = int(read_serial[25:29], 16)
+                measurement = Measurement(humidity, temperature, frequency, air_quality, bee_count, weight)
             if time.time() - self.start_timer >= self.config_file["write-to-database"]:
                 if self.save_to_cloud:
                     self.database_writer.save_measurement(measurement)
@@ -43,9 +44,10 @@ class ReadSerial:
             time.sleep(self.fixed_interval)
                   
 class Measurement:
-    def __init__(self, humidity, temperature, frequency, air_quality, bee_count):
+    def __init__(self, humidity, temperature, frequency, air_quality, bee_count, weight):
         self.humidity = humidity
         self.temperature = temperature
         self.frequency = frequency
         self.air_quality = air_quality
         self.bee_count = bee_count
+        self.weight = weight
