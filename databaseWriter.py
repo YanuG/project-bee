@@ -45,7 +45,7 @@ class DatabaseWriter:
                 "temperature": {"integerValue": str(int(measurement.temperature))},
                 "humidity": {"integerValue": str(int(measurement.humidity))},
                 "air_quality": {"integerValue": str(measurement.air_quality)},
-                # "mass": {"integerValue": str(measurement.mass)},
+                "weight": {"integerValue": str(measurement.weight)},
                 "bees": {"integerValue": str(measurement.bee_count)},
                 "frequency": {"integerValue": str(int(measurement.frequency))}
             }
