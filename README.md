@@ -14,6 +14,8 @@ For the frontend portion of this project: [Click Here](https://github.com/albert
 *   Grove Air Quality Sensor 
 *   DHT 22 Temperature and Huminity Sensor 
 *   MAX4466 Microphone
+*   Load Cell Amplifier - HX711
+*   Load Sensor - 50 kg
 
 ## Run Project
 
