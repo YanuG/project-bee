@@ -15,6 +15,10 @@ For the frontend portion of this project: [Click Here](https://github.com/albert
 *   DHT 22 Temperature and Huminity Sensor 
 *   MAX4466 Microphone
 
+## Install Dependencies
+
+pip install pathlib2
+
 ## Run Project
 
 1. Add DHT-Library to arduino. 

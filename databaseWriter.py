@@ -27,7 +27,7 @@ class DatabaseWriter:
         # Offline database
         # Create local file to store measurment information
         self.conn =  sqlite3.connect(config_file["offline-database-filename"])
-        self.cursor = conn.cursor()
+        self.cursor = self.conn.cursor()
 
         # Check if table exists
         try:
