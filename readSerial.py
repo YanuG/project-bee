@@ -19,7 +19,7 @@ class ReadSerial:
         self.fixed_interval = self.config_file["fixed-interval"]
         # Create repository object
         self.save_to_cloud = self.config_file["save_to_cloud"]
-        self.database_writer = DatabaseWriter(self.config_file["firestore"])
+        self.database_writer = DatabaseWriter(self.config_file["database"])
         self.start_timer = time.time() 
 
     def run(self):

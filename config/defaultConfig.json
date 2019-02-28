@@ -14,7 +14,8 @@
 
     "write-to-database": 20,
 
-    "firestore": {
+    "database": {
+	"offline-database-filename": "local-beehive-measurments.db",
         "base-path":  "beehive-project-ccf6a/databases/(default)/documents",
         "api-key": "AIzaSyA_u4cBRvGO4Vs2i2jqY18A-pOXNuScUrY",
         "email": "projectbee@example.com",
@@ -22,5 +23,4 @@
         "cluster-id": "0cK5kWv3aF92f0JRbkyC",
         "hive-id": "axop5QL2ZAQVqJPNex0n"
 	}
-
 }
