@@ -13,6 +13,7 @@ def test_database_writer(firestore_config):
     database_writer.save_measurement(measurement)
 
 
+# Todo: Rewrite if necessary after changes to firestore client
 def test_firestore(firestore_config):
     print("Testing firestore")
     firestore = Firestore(firestore_config["api-key"], "")
@@ -24,7 +25,6 @@ if __name__ == '__main__':
     config_path = "../config/defaultConfig.json"
     with open(config_path, 'r') as f:
         config = json.load(f)
-    firestore_config = config["firestore"]
-    test_firestore(firestore_config)
+    firestore_config = config["database"]
     test_database_writer(firestore_config)
 
