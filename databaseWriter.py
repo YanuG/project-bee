@@ -51,17 +51,42 @@ class DatabaseWriter:
             }
         }
 
+    @staticmethod
+    def format_measurement(measurement):
+        return {
+            "date": datetime.datetime.utcnow().isoformat("T") + "Z",
+            "temperature": int(measurement.temperature),
+            "humidity": int(measurement.humidity),
+            "air_quality": int(measurement.air_quality),
+            # "mass": int (measurement.mass),
+            "bees": int(measurement.bee_count),
+            "frequency": int(measurement.frequency)
+        }
+
+    # Todo: Move to Firestore object once auth requirement added
+    def add_to_measurement_buffer(self, measurement):
+        base_url = "https://beehive-project-ccf6a.firebaseapp.com/api"
+        endpoint_url = "/addMeasurements"
+        url = base_url + endpoint_url
+        headers = {'Content-Type': 'application/json'}
+        payload = {
+            "hiveId": self.hive_id,
+            "clusterId": self.cluster_id,
+            "measurements": [DatabaseWriter.format_measurement(measurement)]
+        }
+        response = requests.post(url, json.dumps(payload), headers=headers)
+        response.raise_for_status()
+
     def save_measurement(self, measurement):
-        # save measurments to online database
-        path = "/measurements/%s/hives/%s/measurements" % (self.cluster_id, self.hive_id)
-        payload = self.measurement_to_document(measurement)
-        self.firestore.add_document(path, payload)
+        # save measurements to online database
+        self.add_to_measurement_buffer(measurement)
 
         # save measurments into offline database
         self.cursor.execute("INSERT INTO measurments VALUES (? , ? , ?, ?, ?, ?) " , 
             (datetime.datetime.utcnow().isoformat("T") , measurement.temperature, measurement.humidity, measurement.air_quality, measurement.bee_count, measurement.frequency))
         self.conn.commit()
 
+# Todo: Refactor to handle auth in new REST endpoint once implemented
 class Firestore:
     LOGIN_URL = "https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword?key="
     REFRESH_URL = "https://securetoken.googleapis.com/v1/token?key="
