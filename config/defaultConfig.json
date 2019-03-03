@@ -18,6 +18,7 @@
 	"offline-database-filename": "local-beehive-measurments.db",
         "base-path":  "beehive-project-ccf6a/databases/(default)/documents",
         "api-key": "AIzaSyA_u4cBRvGO4Vs2i2jqY18A-pOXNuScUrY",
+        "api-url": "https://beehive-project-ccf6a.firebaseapp.com/api",
         "email": "projectbee@example.com",
         "password": "password",
         "cluster-id": "0cK5kWv3aF92f0JRbkyC",

@@ -14,7 +14,7 @@ class DatabaseWriter:
         self.cluster_id = config_file["cluster-id"]
         self.hive_id = config_file["hive-id"]
         # Create the firestore client
-        self.firestore = Firestore(config_file["api-key"], config_file["base-path"])
+        self.firestore = Firestore(config_file["api-key"], config_file["base-path"], config_file["api-url"])
         # Get the credentials from the config_file or command line
         email = config_file["email"] \
             if "email" in config_file \
@@ -51,31 +51,14 @@ class DatabaseWriter:
             }
         }
 
-    @staticmethod
-    def format_measurement(measurement):
-        return {
-            "date": datetime.datetime.utcnow().isoformat("T") + "Z",
-            "temperature": int(measurement.temperature),
-            "humidity": int(measurement.humidity),
-            "air_quality": int(measurement.air_quality),
-            # "mass": int (measurement.mass),
-            "bees": int(measurement.bee_count),
-            "frequency": int(measurement.frequency)
-        }
-
-    # Todo: Move to Firestore object once auth requirement added
     def add_to_measurement_buffer(self, measurement):
-        base_url = "https://beehive-project-ccf6a.firebaseapp.com/api"
-        endpoint_url = "/addMeasurements"
-        url = base_url + endpoint_url
-        headers = {'Content-Type': 'application/json'}
+        endpoint = "/addMeasurements"
         payload = {
             "hiveId": self.hive_id,
             "clusterId": self.cluster_id,
-            "measurements": [DatabaseWriter.format_measurement(measurement)]
+            "measurements": [measurement.to_dict()]
         }
-        response = requests.post(url, json.dumps(payload), headers=headers)
-        response.raise_for_status()
+        self.firestore.post_to_endpoint(endpoint, payload)
 
     def save_measurement(self, measurement):
         # save measurements to online database
@@ -92,9 +75,10 @@ class Firestore:
     REFRESH_URL = "https://securetoken.googleapis.com/v1/token?key="
     FIRESTORE_URL = "https://firestore.googleapis.com/v1beta1/projects/"
 
-    def __init__(self, api_key, base_path):
+    def __init__(self, api_key, base_path, api_url):
         self.api_key = api_key
         self.url = Firestore.FIRESTORE_URL + base_path
+        self.api_url = api_url
         self.refresh_token = None
         self.id_token = None
         self.user_id = None
@@ -154,6 +138,12 @@ class Firestore:
         response_payload = response.json()
         self.raise_firestore_errors(response_payload)
         print("Successful document creation")
+
+    def post_to_endpoint(self, endpoint, payload):
+        url = self.api_url + endpoint
+        headers = {'Content-Type': 'application/json'}
+        response = requests.post(url, json.dumps(payload), headers=headers)
+        response.raise_for_status()
 
 
 class FirestoreError(ValueError):
