@@ -15,8 +15,7 @@
   //Constants
   #define DHT22_PIN 7
   #define SAMPLES 128             //Must be a power of 2
-  #define SAMPLING_FREQUENCY 9999 //Hz, must be less than 10000 due to ADC
-
+  #define SAMPLING_FREQUENCY 9999 //Hz, must be less than 10000 due to ADC++
   //Pins
   int IR11;
   int IR12;
@@ -88,8 +87,8 @@
      }
      
      microphoneSensor();
-     beeCounterOne();
-     beeCounterTwo();
+//     beeCounterOne();
+//     beeCounterTwo();
      
      
   }
@@ -263,8 +262,9 @@ void convertToHex(int value, int precision) {
     convertToHex(hum , 2);
     convertToHex(temp, 2);
     convertToHex(current_quality, 1);
-    convertToHex(freq, 3);
+    convertToHex(freq, 4);
     convertToHex(numBees, 2);
+    Serial.println("");
 
 
   }

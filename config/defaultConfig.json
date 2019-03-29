@@ -6,13 +6,13 @@
 
     },
 	
-    "display": false,
+    "display": true,
 
     "fixed-interval":  2,
 
-    "save_to_cloud": true,
+    "save_to_cloud": false,
 
-    "write-to-database": 2,
+    "write-to-database": 20,
 
     "database": {
 	"offline-database-filename": "local-beehive-measurments.db",
