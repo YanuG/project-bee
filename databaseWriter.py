@@ -16,13 +16,13 @@ class DatabaseWriter:
         # Create the firestore client
         self.firestore = Firestore(config_file["api-key"], config_file["base-path"])
         # Get the credentials from the config_file or command line
-        email = config_file["email"] \
+        self.email = config_file["email"] \
             if "email" in config_file \
             else input("Email: ")
-        password = config_file["password"] \
+        self.password = config_file["password"] \
             if "password" in config_file \
             else input("Password: ")
-        self.loginSuccessful = self.firestore.login(email, password)
+        self.loginSuccessful = self.firestore.login(self.email, self.password)
 
         # Offline database
         # Create local file to store measurment information
@@ -53,11 +53,13 @@ class DatabaseWriter:
 
     def save_measurement(self, measurement):
         # save measurments to online database when successfully login 
-        if (self.loginSuccessful):
+        if not self.loginSuccessful:
+            self.loginSuccessful = self.firestore.login(self.email, self.password)
+        if self.loginSuccessful:
             path = "/measurements/%s/hives/%s/measurements" % (self.cluster_id, self.hive_id)
             payload = self.measurement_to_document(measurement)
-            self.firestore.add_document(path, payload)
-        else:
+            self.loginSuccessful = self.firestore.add_document(path, payload)
+        if not self.loginSuccessful:
             # save measurments into offline database
             self.cursor.execute("INSERT INTO measurments VALUES (? , ? , ?, ?, ?, ?) " , 
                 (datetime.datetime.utcnow().isoformat("T") , measurement.temperature, measurement.humidity, measurement.air_quality, measurement.bee_count, measurement.frequency))
@@ -126,16 +128,21 @@ class Firestore:
             self.refresh()
 
     def add_document(self, path, payload):
-        self.refresh_if_token_expired()
-        url = self.url + path
-        headers = {
-            "Authorization": "Bearer " + self.id_token,
-            'Content-Type': 'application/json'
-        }
-        response = requests.post(url, json.dumps(payload), headers=headers)
-        response_payload = response.json()
-        self.raise_firestore_errors(response_payload)
-        print("Successful document creation")
+        try: 
+            self.refresh_if_token_expired()
+            url = self.url + path
+            headers = {
+                "Authorization": "Bearer " + self.id_token,
+                'Content-Type': 'application/json'
+            }
+            response = requests.post(url, json.dumps(payload), headers=headers)
+            response_payload = response.json()
+            self.raise_firestore_errors(response_payload)
+            print("Successful document creation")
+            return True
+        except:
+            print("Unable to make document creation, save to offline database")
+            return False
 
 
 class FirestoreError(ValueError):
