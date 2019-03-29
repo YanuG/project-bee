@@ -22,7 +22,7 @@ class DatabaseWriter:
         password = config_file["password"] \
             if "password" in config_file \
             else input("Password: ")
-        self.firestore.login(email, password)
+        self.loginSuccessful = self.firestore.login(email, password)
 
         # Offline database
         # Create local file to store measurment information
@@ -52,15 +52,16 @@ class DatabaseWriter:
         }
 
     def save_measurement(self, measurement):
-        # save measurments to online database
-        path = "/measurements/%s/hives/%s/measurements" % (self.cluster_id, self.hive_id)
-        payload = self.measurement_to_document(measurement)
-        self.firestore.add_document(path, payload)
-
-        # save measurments into offline database
-        self.cursor.execute("INSERT INTO measurments VALUES (? , ? , ?, ?, ?, ?) " , 
-            (datetime.datetime.utcnow().isoformat("T") , measurement.temperature, measurement.humidity, measurement.air_quality, measurement.bee_count, measurement.frequency))
-        self.conn.commit()
+        # save measurments to online database when successfully login 
+        if (self.loginSuccessful):
+            path = "/measurements/%s/hives/%s/measurements" % (self.cluster_id, self.hive_id)
+            payload = self.measurement_to_document(measurement)
+            self.firestore.add_document(path, payload)
+        else:
+            # save measurments into offline database
+            self.cursor.execute("INSERT INTO measurments VALUES (? , ? , ?, ?, ?, ?) " , 
+                (datetime.datetime.utcnow().isoformat("T") , measurement.temperature, measurement.humidity, measurement.air_quality, measurement.bee_count, measurement.frequency))
+            self.conn.commit()
 
 class Firestore:
     LOGIN_URL = "https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword?key="
@@ -84,19 +85,25 @@ class Firestore:
             raise FirestoreError(error["code"], error["message"], details)
 
     def login(self, email, password):
-        response = requests.post(Firestore.LOGIN_URL + self.api_key, {
-            "email": email,
-            "password": password,
-            "returnSecureToken": True
-        })
-        response.raise_for_status()
-        payload = response.json()
-        self.raise_firestore_errors(payload)
-        self.refresh_token = payload["refreshToken"]
-        self.id_token = payload["idToken"]
-        self.user_id = payload["localId"]
-        self.expires_at = time.time() + int(payload["expiresIn"])
-        print("Successful login")
+        try:
+            response = requests.post(Firestore.LOGIN_URL + self.api_key, {
+                "email": email,
+                "password": password,
+                "returnSecureToken": True
+            })
+            response.raise_for_status()
+            payload = response.json()
+            self.raise_firestore_errors(payload)
+            self.refresh_token = payload["refreshToken"]
+            self.id_token = payload["idToken"]
+            self.user_id = payload["localId"]
+            self.expires_at = time.time() + int(payload["expiresIn"])
+            print("Successful login")
+            return True
+        except requests.exceptions.RequestException as e:
+            print ("Unable to login")
+            return False
+
 
     def refresh(self):
         if not self.refresh_token:
