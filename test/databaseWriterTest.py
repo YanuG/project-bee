@@ -24,7 +24,6 @@ if __name__ == '__main__':
     config_path = "../config/defaultConfig.json"
     with open(config_path, 'r') as f:
         config = json.load(f)
-    firestore_config = config["firestore"]
+    firestore_config = config["database"]
     test_firestore(firestore_config)
     test_database_writer(firestore_config)
-
