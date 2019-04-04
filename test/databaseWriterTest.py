@@ -19,14 +19,9 @@ def test_database_writer_error(firestore_config):
     incomplete_config["api-url"] = "https://www.google.ca/"
     database_writer = DatabaseWriter(incomplete_config)
     measurement = Measurement(randint(0, 100), randint(0, 100), randint(0, 100), randint(0, 4), randint(0, 100))
-    try:
-        database_writer.save_measurement(measurement)
-        print("Failed to throw an error when posting to non api url")
-    except Exception as e:
-        print("Successfully threw an error")
+    database_writer.save_measurement(measurement)
 
 
-# Todo: Rewrite if necessary after changes to firestore client
 def test_firestore(firestore_config):
     print("Testing firestore")
     firestore = Firestore(firestore_config["api-key"], firestore_config["base-path"], firestore_config["api-url"])
