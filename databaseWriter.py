@@ -16,13 +16,13 @@ class DatabaseWriter:
         # Create the firestore client
         self.firestore = Firestore(config_file["api-key"], config_file["base-path"], config_file["api-url"])
         # Get the credentials from the config_file or command line
-        self.email = config_file["email"] \
+        email = config_file["email"] \
             if "email" in config_file \
             else input("Email: ")
-        self.password = config_file["password"] \
+        password = config_file["password"] \
             if "password" in config_file \
             else input("Password: ")
-        self.loginSuccessful = self.firestore.login(self.email, self.password)
+        self.firestore.login(email, password)
 
         # Offline database
         # Create local file to store measurment information
@@ -61,18 +61,20 @@ class DatabaseWriter:
         self.firestore.post_to_endpoint(endpoint, payload)
 
     def save_measurement(self, measurement):
-        # save measurments to online database when successfully login
-        if not self.loginSuccessful:
-            self.loginSuccessful = self.firestore.login(self.email, self.password)
-        if self.loginSuccessful:
-            path = "/measurements/%s/hives/%s/measurements" % (self.cluster_id, self.hive_id)
-            payload = self.measurement_to_document(measurement)
-            self.loginSuccessful = self.firestore.add_document(path, payload)
-        if not self.loginSuccessful:
-            # save measurments into offline database
-            self.cursor.execute("INSERT INTO measurments VALUES (? , ? , ?, ?, ?, ?) " ,
-                (datetime.datetime.utcnow().isoformat("T") , measurement.temperature, measurement.humidity, measurement.air_quality, measurement.bee_count, measurement.frequency))
-            self.conn.commit()
+        try:
+            self.add_to_measurement_buffer(measurement)
+        except Exception as cloud_exception:
+            print("Failed to save to cloud firestore", cloud_exception)
+            print("Saving to offline database")
+            try:
+                self.cursor.execute("INSERT INTO measurements VALUES (? , ? , ?, ?, ?, ?) ",
+                                    (datetime.datetime.utcnow().isoformat("T"), measurement.temperature,
+                                     measurement.humidity, measurement.air_quality, measurement.bee_count,
+                                     measurement.frequency))
+                self.conn.commit()
+            except Exception as local_exception:
+                print("Unable to save to local database", local_exception)
+
 
 class Firestore:
     LOGIN_URL = "https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword?key="
@@ -111,11 +113,9 @@ class Firestore:
             self.user_id = payload["localId"]
             self.expires_at = time.time() + int(payload["expiresIn"])
             print("Successful login")
-            return True
-        except requests.exceptions.RequestException as e:
-            print ("Unable to login")
-            return False
-
+        except Exception as exception:
+            print("Unable to login")
+            raise exception
 
     def refresh(self):
         if not self.refresh_token:
@@ -149,16 +149,19 @@ class Firestore:
             response_payload = response.json()
             self.raise_firestore_errors(response_payload)
             print("Successful document creation")
-            return True
-        except:
-            print("Unable to make document creation, save to offline database")
-            return False
+        except Exception as exception:
+            print("Unable to add document to cloud firestore")
+            raise exception
 
     def post_to_endpoint(self, endpoint, payload):
-        url = self.api_url + endpoint
-        headers = {'Content-Type': 'application/json'}
-        response = requests.post(url, json.dumps(payload), headers=headers)
-        response.raise_for_status()
+        try:
+            url = self.api_url + endpoint
+            headers = {'Content-Type': 'application/json'}
+            response = requests.post(url, json.dumps(payload), headers=headers)
+            response.raise_for_status()
+        except Exception as exception:
+            print("Unable to post to endpoint")
+            raise exception
 
 
 class FirestoreError(ValueError):
