@@ -2,7 +2,7 @@ import time
 import requests
 import json
 import datetime
-import sqlite3 
+import sqlite3
 
 
 class DatabaseWriter:
@@ -35,7 +35,7 @@ class DatabaseWriter:
         except Exception as e:
             self.cursor.execute('''CREATE TABLE measurments
                 (date, temperature, humidity, air_quality, bees, frequency)''')
-        
+
 
     @staticmethod
     def measurement_to_document(measurement):
@@ -61,7 +61,7 @@ class DatabaseWriter:
             self.loginSuccessful = self.firestore.add_document(path, payload)
         if not self.loginSuccessful:
             # save measurments into offline database
-            self.cursor.execute("INSERT INTO measurments VALUES (? , ? , ?, ?, ?, ?) " , 
+            self.cursor.execute("INSERT INTO measurments VALUES (? , ? , ?, ?, ?, ?) " ,
                 (datetime.datetime.utcnow().isoformat("T") , measurement.temperature, measurement.humidity, measurement.air_quality, measurement.bee_count, measurement.frequency))
             self.conn.commit()
 
@@ -128,7 +128,7 @@ class Firestore:
             self.refresh()
 
     def add_document(self, path, payload):
-        try: 
+        try:
             self.refresh_if_token_expired()
             url = self.url + path
             headers = {
@@ -140,8 +140,8 @@ class Firestore:
             self.raise_firestore_errors(response_payload)
             print("Successful document creation")
             return True
-        except:
-            print("Unable to make document creation, save to offline database")
+        except Exception as e:
+            print("Unable to save document to Firestore", e)
             return False
 
 
