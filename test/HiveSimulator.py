@@ -1,8 +1,8 @@
 import json
-import datetime
 from random import randint
 from databaseWriter import Firestore
 from time import sleep
+from readSerial import Measurement
 
 
 class HiveSimulator:
@@ -11,30 +11,24 @@ class HiveSimulator:
         self.hive_id = hive_id
         self.firestore = firestore
 
-    def save_measurement(self):
-        path = "/measurements/%s/hives/%s/measurements" % (self.cluster_id, self.hive_id)
-        payload = HiveSimulator.create_random_payload()
-        print("Uploading simulated measurement", payload)
-        self.firestore.add_document(path, payload)
+    def save_measurement(self, measurement):
+        endpoint = "/addMeasurements"
+        payload = {
+            "hiveId": self.hive_id,
+            "clusterId": self.cluster_id,
+            "measurements": [measurement.to_dict()]
+        }
+        self.firestore.post_to_endpoint(endpoint, payload)
+        print("Posting", payload)
 
     @staticmethod
-    def create_random_payload():
-        return {
-            "fields": {
-                "date": {"timestampValue": datetime.datetime.utcnow().isoformat("T") + "Z"},
-                "temperature": {"integerValue": str(randint(32, 36))},
-                "humidity": {"integerValue": str(randint(40, 80))},
-                "air_quality": {"integerValue": str(randint(2, 5))},
-                # "mass": {"integerValue": str(randint(0, 100))},
-                "bees": {"integerValue": str(randint(0, 100))},
-                "frequency": {"integerValue": str(randint(0, 100))}
-            }
-        }
+    def create_random_measurement():
+        return Measurement(randint(40, 80), randint(32, 36), randint(0, 100), randint(3, 5), randint(0, 100))
 
 
 class ClusterSimulator:
     def __init__(self, config):
-        self.firestore = Firestore(config["api-key"], config["base-path"])
+        self.firestore = Firestore(config["api-key"], config["base-path"], config["api-url"])
         self.firestore.login(config["email"], config["password"])
 
     def start_simulation(self):
@@ -42,10 +36,12 @@ class ClusterSimulator:
         east_hive = HiveSimulator(self.firestore, "0cK5kWv3aF92f0JRbkyC", "3gbttJjw7SWYlIqz7uTg")
         west_hive = HiveSimulator(self.firestore, "0cK5kWv3aF92f0JRbkyC", "okF0pYIZ1eU2kRY9jUcb")
 
-        hives = [south_hive, east_hive, west_hive]
+        hives = {"west": west_hive, "east": east_hive, "south": south_hive}
         for i in range(6):
-            for hive in hives:
-                hive.save_measurement()
+            for hive_name in hives:
+                print("Uploading to ", hive_name)
+                measurement = HiveSimulator.create_random_measurement()
+                hives[hive_name].save_measurement(measurement)
                 sleep(10)
 
 
