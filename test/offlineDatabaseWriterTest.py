@@ -16,10 +16,10 @@ def main(args):
     conn = sqlite3.connect(config_file["offline-database-filename"])
     cursor = conn.cursor()
     try:
-        cursor.execute("SELECT * FROM measurments")
+        cursor.execute("SELECT * FROM measurements")
     except Exception as e:
         print "False"
-        cursor.execute('''CREATE TABLE measurments
+        cursor.execute('''CREATE TABLE measurements
             (date, temperature, humidity, air_quality, bees, frequency)''')
 
 if __name__ == "__main__":

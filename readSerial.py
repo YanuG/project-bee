@@ -1,5 +1,5 @@
 import serial
-import time
+import datetime
 from pathlib2 import Path
 import json
 import sched, time
@@ -27,8 +27,8 @@ class ReadSerial:
             if self.ser.isOpen():
                 read_serial = self.ser.readline()
             if (self.config_file["display"]):
-                print read_serial
-                print len(read_serial)
+                print(read_serial)
+                print(len(read_serial))
             if (len(read_serial) == 28):
                 # read sensor data 
                 humidity = int(read_serial[0:4], 16)
@@ -38,13 +38,14 @@ class ReadSerial:
                 bee_count = int(read_serial[21:25], 16)
                 self.measurement = Measurement(humidity, temperature, frequency, air_quality, bee_count)
                 if (self.config_file["display"]):
-                    print "Hum: " + str(humidity) + " Temp: " + str(temperature) + " Air Quality: " + str(air_quality) + " Frequency " + str(frequency) + " Bee Count " + str(bee_count)
+                    print("Hum: " + str(humidity) + " Temp: " + str(temperature) + " Air Quality: " + str(air_quality) + " Frequency " + str(frequency) + " Bee Count " + str(bee_count))
                 if time.time() - self.start_timer >= self.config_file["write-to-database"]:
                     if self.save_to_cloud:
                         self.database_writer.save_measurement(self.measurement)
                     self.start_timer = time.time()
             time.sleep(self.fixed_interval)
-                  
+
+
 class Measurement:
     def __init__(self, humidity, temperature, frequency, air_quality, bee_count):
         self.humidity = humidity
@@ -52,3 +53,15 @@ class Measurement:
         self.frequency = frequency
         self.air_quality = air_quality
         self.bee_count = bee_count
+        self.date = datetime.datetime.utcnow()
+
+    def to_dict(self):
+        return {
+            "date": self.date.isoformat("T") + "Z",
+            "temperature": int(self.temperature),
+            "humidity": int(self.humidity),
+            "air_quality": int(self.air_quality),
+            # "mass": int (self.mass),
+            "bees": int(self.bee_count),
+            "frequency": int(self.frequency)
+        }
