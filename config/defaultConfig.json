@@ -10,9 +10,9 @@
 
     "fixed-interval":  2,
 
-    "save_to_cloud": false,
+    "save_to_cloud": true,
 
-    "write-to-database": 20,
+    "write-to-database": 2,
 
     "database": {
 	"offline-database-filename": "local-beehive-measurments.db",
@@ -23,5 +23,5 @@
         "password": "password",
         "cluster-id": "0cK5kWv3aF92f0JRbkyC",
         "hive-id": "axop5QL2ZAQVqJPNex0n"
-	}
+    }
 }
