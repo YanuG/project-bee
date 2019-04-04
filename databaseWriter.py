@@ -31,9 +31,9 @@ class DatabaseWriter:
 
         # Check if table exists
         try:
-            self.cursor.execute("SELECT * FROM measurments")
+            self.cursor.execute("SELECT * FROM measurements")
         except Exception as e:
-            self.cursor.execute('''CREATE TABLE measurments
+            self.cursor.execute('''CREATE TABLE measurements
                 (date, temperature, humidity, air_quality, bees, frequency)''')
         
 
