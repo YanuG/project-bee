@@ -4,9 +4,9 @@
     "baud": 9600
   },
   "display": true,
-  "fixed-interval": 2,
+  "fixed-interval": 0.05,
   "save_to_cloud": true,
-  "write-to-database": 2,
+  "write-to-database": 10,
   "database": {
     "offline-database-filename": "local-beehive-measurments.db",
     "base-path": "beehive-project-ccf6a/databases/(default)/documents",
